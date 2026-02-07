@@ -4,21 +4,21 @@ A web-based puzzle game where you organize DVDs on shelves in alphabetical order
 
 ## How to Play
 
-1. DVDs appear on the floor periodically
-2. Tap a DVD to select it, then tap an empty shelf slot to place it
-3. Keep DVDs in **alphabetical order** on each shelf (left to right)
+1. DVDs appear on the floor periodically (12 total per game)
+2. Tap a DVD to select it, then tap an empty shelf slot to place it (or drag on touch devices)
+3. Keep DVDs in **alphabetical order across ALL shelves** (left-to-right, top-to-bottom)
 4. "The" at the start of titles is ignored for sorting (e.g., "The Matrix" sorts as "Matrix")
-5. Leave gaps for future movies that might need to go between existing ones
+5. If you place a DVD out of order, it falls back to the floor
+6. Place all 12 DVDs to win!
 
-## Lose Conditions
+## Win/Lose Conditions
 
-- **Floor overflow**: If too many DVDs pile up on the floor (max 5), game over
+- **Win**: Place all 12 DVDs on the shelves (floor empty)
+- **Lose**: If too many DVDs pile up on the floor (max 5), game over
 
 ## Scoring
 
 - +10 points per correctly placed DVD (multiplied by level)
-- +5 points for "close enough" placements
-- -50 points per DVD when a shelf collapses
 - Level up every 10 DVDs shelved (DVDs spawn faster)
 
 ## Running the Game
@@ -44,7 +44,7 @@ python -m http.server 8000
 
 ## Features
 
-- Mobile-friendly touch controls
+- Mobile-friendly touch controls (tap or drag)
 - Responsive layout (max 500px on desktop, full width on mobile)
 - No scrolling - fills viewport height
 - Safe area support for notched devices

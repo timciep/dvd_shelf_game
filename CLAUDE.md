@@ -14,15 +14,16 @@ A simple browser-based puzzle game. Pure HTML/CSS/JS with no dependencies or bui
 
 - `SHELVES_COUNT = 3` - Number of shelves
 - `SLOTS_PER_SHELF = 4` - Slots per shelf
+- `TOTAL_DVDS = 12` - Total DVDs spawned per game (fills all slots)
 - `MAX_FLOOR_DVDS = 5` - Floor capacity before game over
-- `TOLERANCE = 3` - How many positions off is acceptable before shelf collapse
 
 ## Core Mechanics
 
 1. **Sorting**: Alphabetical order ignoring "The " prefix via `getSortKey()`
-2. **Validation**: On placement, checks if shelf order is maintained
-3. **Collapse**: If placement breaks order beyond tolerance, shelf contents fall to floor
-4. **Spawning**: New DVD every 4 seconds initially, speeds up with level
+2. **Global Order Validation**: DVDs must be alphabetically ordered across ALL shelves (positions 0-11 reading left-to-right, top-to-bottom)
+3. **Invalid Placement**: If placement breaks global order, that DVD falls back to floor with animation
+4. **Spawning**: New DVD every 4 seconds initially, speeds up with level (stops at 12 DVDs)
+5. **Win Condition**: Place all 12 DVDs on shelves (floor empty) to win
 
 ## Layout Approach
 
@@ -33,7 +34,8 @@ A simple browser-based puzzle game. Pure HTML/CSS/JS with no dependencies or bui
 
 ## Mobile Considerations
 
-- Touch: tap-to-select, tap-to-place (no drag-and-drop)
+- Touch: tap-to-select/tap-to-place OR touch-drag-and-drop (both supported)
+- Touch drag creates a visual clone that follows finger
 - `user-scalable=no` and `touch-action: manipulation` to prevent zoom
 - `env(safe-area-inset-*)` for notched devices
 - Text selection disabled
