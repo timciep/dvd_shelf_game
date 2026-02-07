@@ -2,6 +2,8 @@
 
 A web-based puzzle game where you organize DVDs on shelves in alphabetical order. Think Tetris meets library organization.
 
+![DVD Shelf Organizer Screenshot](images/m/screenshot.png)
+
 ## How to Play
 
 1. DVDs appear on the floor periodically (12 total per game)
