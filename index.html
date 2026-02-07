@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>DVD Shelf Organizer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="start-overlay" id="startOverlay">
+        <h1>DVD Shelf Organizer</h1>
+        <div class="start-instructions">
+            <h3>How to Play</h3>
+            <p>Tap a DVD, then tap a shelf slot to place it in <strong>alphabetical order</strong>.</p>
+            <p>"The" at the start of titles is ignored.</p>
+            <p>Leave gaps for future movies!</p>
+            <p><strong>Warning:</strong> Place a DVD too far off and the shelf collapses!</p>
+            <p>Too many on the floor = game over!</p>
+        </div>
+        <button class="start-btn" onclick="startGame()">Start Game</button>
+    </div>
+
+    <div class="game-over-overlay" id="gameOverOverlay">
+        <div class="game-over-text">GAME OVER</div>
+        <div class="final-score">Score: <span id="finalScore">0</span></div>
+        <div id="gameOverReason"></div>
+        <button class="restart-btn" onclick="restartGame()">Play Again</button>
+    </div>
+
+    <div class="game-container">
+        <header id="gameHeader">
+            <h1>DVD Shelf</h1>
+            <div class="stats">
+                <div class="stat">Points <span class="stat-value" id="score">0</span></div>
+                <div class="stat">Level <span class="stat-value" id="level">1</span></div>
+            </div>
+        </header>
+
+        <div class="shelving-unit" id="shelvingUnit"></div>
+
+        <div class="floor-area">
+            <div class="floor-header">
+                <div class="floor-label">FLOOR</div>
+                <div class="floor-capacity" id="floorCapacity">0 / 5</div>
+            </div>
+            <div class="floor-dvds" id="floorDvds"></div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
