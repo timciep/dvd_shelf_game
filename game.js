@@ -507,7 +507,7 @@ function spawnConfetti(container) {
         emoji.style.top = -30 + 'px';
         emoji.style.animationDelay = Math.random() * 2.5 + 's';
         emoji.style.animationDuration = (3 + Math.random() * 2) + 's';
-        emoji.style.fontSize = (20 + Math.random() * 16) + 'px';
+        emoji.style.fontSize = (32 + Math.random() * 24) + 'px';
 
         container.appendChild(emoji);
     }
