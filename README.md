@@ -1,4 +1,4 @@
-# DVD Shelf Organizer
+# DVD Shelf Organizer Game
 
 A web-based puzzle game where you organize DVDs on shelves in alphabetical order. Think Tetris meets library organization.
 
