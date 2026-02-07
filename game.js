@@ -152,8 +152,17 @@ function spawnDVD() {
     usedTitles.add(title);
 
     const dvd = createDVD(title);
+    dvd.classList.add('dvd-spawn');
+    dvd.addEventListener('animationend', () => dvd.classList.remove('dvd-spawn'), { once: true });
     floor.appendChild(dvd);
     dvdsSpawned++;
+
+    // Flash a $ emoji on the new DVD
+    const flash = document.createElement('div');
+    flash.className = 'spawn-flash';
+    flash.textContent = '$';
+    dvd.appendChild(flash);
+    flash.addEventListener('animationend', () => flash.remove(), { once: true });
 
     updateFloorCapacity();
 }
@@ -265,11 +274,20 @@ function placeDVDInSlot(dvd, slot) {
         updateStats();
         updateFloorCapacity();
 
-        // Check for win - all DVDs spawned and floor is empty
         const floor = document.getElementById('floorDvds');
+
+        // Check for win - all DVDs spawned and floor is empty
         if (dvdsSpawned >= TOTAL_DVDS && floor.children.length === 0) {
             gameWin();
             return true;
+        }
+
+        // Spawn immediately when floor is empty instead of waiting for timer
+        if (floor.children.length === 0 && dvdsSpawned < TOTAL_DVDS && spawnInterval) {
+            clearInterval(spawnInterval);
+            spawnDVD();
+            const intervalMs = DIFFICULTY_SETTINGS[difficulty].interval;
+            spawnInterval = setInterval(spawnDVD, intervalMs);
         }
     }
 
