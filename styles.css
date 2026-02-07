@@ -297,6 +297,7 @@ h1 {
 
 
 .restart-btn, .start-btn {
+    margin-top: 10px;
     background: #e94560;
     color: #fff;
     border: none;

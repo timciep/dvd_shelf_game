@@ -470,6 +470,7 @@ function gameOver(reason) {
     gameRunning = false;
     clearInterval(spawnInterval);
 
+    document.getElementById('gameOverTitle').textContent = 'GAME OVER';
     document.getElementById('finalScore').textContent = score;
     const gameOverDiff = document.getElementById('gameOverDifficulty');
     gameOverDiff.textContent = DIFFICULTY_SETTINGS[difficulty].label;
@@ -482,6 +483,7 @@ function gameWin() {
     gameRunning = false;
     clearInterval(spawnInterval);
 
+    document.getElementById('gameOverTitle').textContent = 'WIN!';
     document.getElementById('finalScore').textContent = score;
     const gameOverDiff = document.getElementById('gameOverDifficulty');
     gameOverDiff.textContent = DIFFICULTY_SETTINGS[difficulty].label;
