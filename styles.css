@@ -438,6 +438,23 @@ h1 {
     transform: scale(0.98);
 }
 
+.credit {
+    position: absolute;
+    bottom: 20px;
+    font-size: 0.85em;
+    color: rgba(255,255,255,0.5);
+}
+
+.credit a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+}
+
+.credit a:hover {
+    color: #e94560;
+    text-decoration: underline;
+}
+
 #gameOverReason {
     color: #ff6b6b;
     margin-bottom: 15px;
