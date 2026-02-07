@@ -1,36 +1,154 @@
-const MOVIE_TITLES = [
-    "The Shawshank Redemption", "The Godfather", "The Dark Knight", "Pulp Fiction",
-    "Forrest Gump", "Inception", "The Matrix", "Goodfellas", "Fight Club",
-    "The Silence of the Lambs", "Se7en", "The Usual Suspects", "Memento",
-    "The Prestige", "The Departed", "Gladiator", "Braveheart", "The Green Mile",
-    "Saving Private Ryan", "Schindler's List", "Interstellar", "The Pianist",
-    "Whiplash", "Django Unchained", "The Wolf of Wall Street", "American History X",
-    "Casablanca", "City of God", "Alien", "Aliens", "Terminator 2", "The Terminator",
-    "Back to the Future", "Raiders of the Lost Ark", "Star Wars", "The Empire Strikes Back",
-    "Jurassic Park", "E.T.", "Jaws", "Rocky", "Die Hard", "Predator", "RoboCop",
-    "Blade Runner", "Total Recall", "The Thing", "Scarface", "Heat", "Casino",
-    "Goodfellas", "The Godfather Part II", "Apocalypse Now", "Full Metal Jacket",
-    "Platoon", "The Deer Hunter", "Taxi Driver", "Raging Bull", "The Exorcist",
-    "Halloween", "A Nightmare on Elm Street", "Friday the 13th", "The Shining",
-    "Psycho", "Vertigo", "Rear Window", "North by Northwest", "Chinatown",
-    "One Flew Over the Cuckoo's Nest", "A Clockwork Orange", "2001: A Space Odyssey",
-    "Dr. Strangelove", "The Big Lebowski", "Fargo", "No Country for Old Men",
-    "There Will Be Blood", "Magnolia", "Boogie Nights", "Reservoir Dogs",
-    "Kill Bill", "Inglourious Basterds", "The Hateful Eight", "Once Upon a Time in Hollywood",
-    "Zodiac", "Gone Girl", "The Social Network", "Moneyball", "The Curious Case of Benjamin Button",
-    "Avatar", "Titanic", "The Avengers", "Iron Man", "Spider-Man", "Batman Begins",
-    "Superman", "Wonder Woman", "Aquaman", "Guardians of the Galaxy", "Thor",
-    "Captain America", "Black Panther", "Deadpool", "Logan", "X-Men",
-    "The Wolverine", "Fantastic Four", "Hulk", "Ant-Man", "Doctor Strange",
-    "Shrek", "Toy Story", "Finding Nemo", "The Incredibles", "Monsters Inc",
-    "Up", "Wall-E", "Ratatouille", "Coco", "Inside Out", "Frozen", "Moana",
-    "Zootopia", "Big Hero 6", "Tangled", "Brave", "Cars", "A Bug's Life",
-    "The Lion King", "Aladdin", "Beauty and the Beast", "The Little Mermaid",
-    "Mulan", "Pocahontas", "Hercules", "Tarzan", "Lilo and Stitch",
-    "The Nightmare Before Christmas", "Coraline", "ParaNorman",
-    "Spirited Away", "My Neighbor Totoro", "Princess Mononoke", "Howl's Moving Castle",
-    "Akira", "Ghost in the Shell", "Your Name", "Wuthering Heights"
-];
+// Movie poster paths (local images)
+const MOVIE_POSTERS = {
+    "The Shawshank Redemption": "images/posters/The_Shawshank_Redemption.jpg",
+    "The Godfather": "images/posters/The_Godfather.jpg",
+    "The Dark Knight": "images/posters/The_Dark_Knight.jpg",
+    "Pulp Fiction": "images/posters/Pulp_Fiction.jpg",
+    "Forrest Gump": "images/posters/Forrest_Gump.jpg",
+    "Inception": "images/posters/Inception.jpg",
+    "The Matrix": "images/posters/The_Matrix.jpg",
+    "Goodfellas": "images/posters/Goodfellas.jpg",
+    "Fight Club": "images/posters/Fight_Club.jpg",
+    "The Silence of the Lambs": "images/posters/The_Silence_of_the_Lambs.jpg",
+    "Se7en": "images/posters/Se7en.jpg",
+    "The Usual Suspects": "images/posters/The_Usual_Suspects.jpg",
+    "Memento": "images/posters/Memento.jpg",
+    "The Prestige": "images/posters/The_Prestige.jpg",
+    "The Departed": "images/posters/The_Departed.jpg",
+    "Gladiator": "images/posters/Gladiator.jpg",
+    "Braveheart": "images/posters/Braveheart.jpg",
+    "The Green Mile": "images/posters/The_Green_Mile.jpg",
+    "Saving Private Ryan": "images/posters/Saving_Private_Ryan.jpg",
+    "Schindlers List": "images/posters/Schindlers_List.jpg",
+    "Interstellar": "images/posters/Interstellar.jpg",
+    "The Pianist": "images/posters/The_Pianist.jpg",
+    "Whiplash": "images/posters/Whiplash.jpg",
+    "Django Unchained": "images/posters/Django_Unchained.jpg",
+    "The Wolf of Wall Street": "images/posters/The_Wolf_of_Wall_Street.jpg",
+    "American History X": "images/posters/American_History_X.jpg",
+    "Casablanca": "images/posters/Casablanca.jpg",
+    "City of God": "images/posters/City_of_God.jpg",
+    "Alien": "images/posters/Alien.jpg",
+    "Aliens": "images/posters/Aliens.jpg",
+    "Terminator 2": "images/posters/Terminator_2.jpg",
+    "The Terminator": "images/posters/The_Terminator.jpg",
+    "Back to the Future": "images/posters/Back_to_the_Future.jpg",
+    "Raiders of the Lost Ark": "images/posters/Raiders_of_the_Lost_Ark.jpg",
+    "Star Wars": "images/posters/Star_Wars.jpg",
+    "The Empire Strikes Back": "images/posters/The_Empire_Strikes_Back.jpg",
+    "Jurassic Park": "images/posters/Jurassic_Park.jpg",
+    "ET": "images/posters/ET.jpg",
+    "Jaws": "images/posters/Jaws.jpg",
+    "Rocky": "images/posters/Rocky.jpg",
+    "Die Hard": "images/posters/Die_Hard.jpg",
+    "Predator": "images/posters/Predator.jpg",
+    "RoboCop": "images/posters/RoboCop.jpg",
+    "Blade Runner": "images/posters/Blade_Runner.jpg",
+    "Total Recall": "images/posters/Total_Recall.jpg",
+    "The Thing": "images/posters/The_Thing.jpg",
+    "Scarface": "images/posters/Scarface.jpg",
+    "Heat": "images/posters/Heat.jpg",
+    "Casino": "images/posters/Casino.jpg",
+    "The Godfather Part II": "images/posters/The_Godfather_Part_II.jpg",
+    "Apocalypse Now": "images/posters/Apocalypse_Now.jpg",
+    "Full Metal Jacket": "images/posters/Full_Metal_Jacket.jpg",
+    "Platoon": "images/posters/Platoon.jpg",
+    "The Deer Hunter": "images/posters/The_Deer_Hunter.jpg",
+    "Taxi Driver": "images/posters/Taxi_Driver.jpg",
+    "Raging Bull": "images/posters/Raging_Bull.jpg",
+    "The Exorcist": "images/posters/The_Exorcist.jpg",
+    "Halloween": "images/posters/Halloween.jpg",
+    "A Nightmare on Elm Street": "images/posters/A_Nightmare_on_Elm_Street.jpg",
+    "Friday the 13th": "images/posters/Friday_the_13th.jpg",
+    "The Shining": "images/posters/The_Shining.jpg",
+    "Psycho": "images/posters/Psycho.jpg",
+    "Vertigo": "images/posters/Vertigo.jpg",
+    "Rear Window": "images/posters/Rear_Window.jpg",
+    "North by Northwest": "images/posters/North_by_Northwest.jpg",
+    "Chinatown": "images/posters/Chinatown.jpg",
+    "One Flew Over the Cuckoos Nest": "images/posters/One_Flew_Over_the_Cuckoos_Nest.jpg",
+    "A Clockwork Orange": "images/posters/A_Clockwork_Orange.jpg",
+    "2001 A Space Odyssey": "images/posters/2001_A_Space_Odyssey.jpg",
+    "Dr Strangelove": "images/posters/Dr_Strangelove.jpg",
+    "The Big Lebowski": "images/posters/The_Big_Lebowski.jpg",
+    "Fargo": "images/posters/Fargo.jpg",
+    "No Country for Old Men": "images/posters/No_Country_for_Old_Men.jpg",
+    "There Will Be Blood": "images/posters/There_Will_Be_Blood.jpg",
+    "Magnolia": "images/posters/Magnolia.jpg",
+    "Boogie Nights": "images/posters/Boogie_Nights.jpg",
+    "Reservoir Dogs": "images/posters/Reservoir_Dogs.jpg",
+    "Kill Bill": "images/posters/Kill_Bill.jpg",
+    "Inglourious Basterds": "images/posters/Inglourious_Basterds.jpg",
+    "The Hateful Eight": "images/posters/The_Hateful_Eight.jpg",
+    "Once Upon a Time in Hollywood": "images/posters/Once_Upon_a_Time_in_Hollywood.jpg",
+    "Zodiac": "images/posters/Zodiac.jpg",
+    "Gone Girl": "images/posters/Gone_Girl.jpg",
+    "The Social Network": "images/posters/The_Social_Network.jpg",
+    "Moneyball": "images/posters/Moneyball.jpg",
+    "The Curious Case of Benjamin Button": "images/posters/The_Curious_Case_of_Benjamin_Button.jpg",
+    "Avatar": "images/posters/Avatar.jpg",
+    "Titanic": "images/posters/Titanic.jpg",
+    "The Avengers": "images/posters/The_Avengers.jpg",
+    "Iron Man": "images/posters/Iron_Man.jpg",
+    "Spider-Man": "images/posters/Spider-Man.jpg",
+    "Batman Begins": "images/posters/Batman_Begins.jpg",
+    "Superman": "images/posters/Superman.jpg",
+    "Wonder Woman": "images/posters/Wonder_Woman.jpg",
+    "Aquaman": "images/posters/Aquaman.jpg",
+    "Guardians of the Galaxy": "images/posters/Guardians_of_the_Galaxy.jpg",
+    "Thor": "images/posters/Thor.jpg",
+    "Captain America": "images/posters/Captain_America.jpg",
+    "Black Panther": "images/posters/Black_Panther.jpg",
+    "Deadpool": "images/posters/Deadpool.jpg",
+    "Logan": "images/posters/Logan.jpg",
+    "X-Men": "images/posters/X-Men.jpg",
+    "The Wolverine": "images/posters/The_Wolverine.jpg",
+    "Fantastic Four": "images/posters/Fantastic_Four.jpg",
+    "Hulk": "images/posters/Hulk.jpg",
+    "Ant-Man": "images/posters/Ant-Man.jpg",
+    "Doctor Strange": "images/posters/Doctor_Strange.jpg",
+    "Shrek": "images/posters/Shrek.jpg",
+    "Toy Story": "images/posters/Toy_Story.jpg",
+    "Finding Nemo": "images/posters/Finding_Nemo.jpg",
+    "The Incredibles": "images/posters/The_Incredibles.jpg",
+    "Monsters Inc": "images/posters/Monsters_Inc.jpg",
+    "Up": "images/posters/Up.jpg",
+    "Wall-E": "images/posters/Wall-E.jpg",
+    "Ratatouille": "images/posters/Ratatouille.jpg",
+    "Coco": "images/posters/Coco.jpg",
+    "Inside Out": "images/posters/Inside_Out.jpg",
+    "Frozen": "images/posters/Frozen.jpg",
+    "Moana": "images/posters/Moana.jpg",
+    "Zootopia": "images/posters/Zootopia.jpg",
+    "Big Hero 6": "images/posters/Big_Hero_6.jpg",
+    "Tangled": "images/posters/Tangled.jpg",
+    "Brave": "images/posters/Brave.jpg",
+    "Cars": "images/posters/Cars.jpg",
+    "A Bugs Life": "images/posters/A_Bugs_Life.jpg",
+    "The Lion King": "images/posters/The_Lion_King.jpg",
+    "Aladdin": "images/posters/Aladdin.jpg",
+    "Beauty and the Beast": "images/posters/Beauty_and_the_Beast.jpg",
+    "The Little Mermaid": "images/posters/The_Little_Mermaid.jpg",
+    "Mulan": "images/posters/Mulan.jpg",
+    "Pocahontas": "images/posters/Pocahontas.jpg",
+    "Hercules": "images/posters/Hercules.jpg",
+    "Tarzan": "images/posters/Tarzan.jpg",
+    "Lilo and Stitch": "images/posters/Lilo_and_Stitch.jpg",
+    "The Nightmare Before Christmas": "images/posters/The_Nightmare_Before_Christmas.jpg",
+    "Coraline": "images/posters/Coraline.jpg",
+    "ParaNorman": "images/posters/ParaNorman.jpg",
+    "Spirited Away": "images/posters/Spirited_Away.jpg",
+    "My Neighbor Totoro": "images/posters/My_Neighbor_Totoro.jpg",
+    "Princess Mononoke": "images/posters/Princess_Mononoke.jpg",
+    "Howls Moving Castle": "images/posters/Howls_Moving_Castle.jpg",
+    "Akira": "images/posters/Akira.jpg",
+    "Ghost in the Shell": "images/posters/Ghost_in_the_Shell.jpg",
+    "Your Name": "images/posters/Your_Name.jpg",
+    "The Truman Show": "images/posters/The_Truman_Show.jpg",
+    "Eternal Sunshine of the Spotless Mind": "images/posters/Eternal_Sunshine_of_the_Spotless_Mind.jpg"
+};
+
+const MOVIE_TITLES = Object.keys(MOVIE_POSTERS);
 
 let score = 0;
 let difficulty = 'medium';
@@ -102,9 +220,17 @@ function createDVD(title) {
     dvd.dataset.sortKey = getSortKey(title);
     dvd.draggable = true;
 
-    const color = DVD_COLORS[Math.floor(Math.random() * DVD_COLORS.length)];
-    dvd.style.background = `linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -30)} 100%)`;
-    dvd.dataset.bgColor = color;
+    const posterPath = MOVIE_POSTERS[title];
+    if (posterPath) {
+        dvd.style.backgroundImage = `url(${posterPath})`;
+        dvd.style.backgroundSize = 'cover';
+        dvd.style.backgroundPosition = 'center';
+        dvd.dataset.posterPath = posterPath;
+    } else {
+        const color = DVD_COLORS[Math.floor(Math.random() * DVD_COLORS.length)];
+        dvd.style.background = `linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -30)} 100%)`;
+        dvd.dataset.bgColor = color;
+    }
 
     const spine = document.createElement('div');
     spine.className = 'dvd-spine';
@@ -257,8 +383,11 @@ function placeDVDInSlot(dvd, slot) {
     }
 
     const newDvd = createDVD(dvd.dataset.title);
-    newDvd.style.background = `linear-gradient(135deg, ${dvd.dataset.bgColor} 0%, ${adjustColor(dvd.dataset.bgColor, -30)} 100%)`;
-    newDvd.dataset.bgColor = dvd.dataset.bgColor;
+    // Preserve original styling (createDVD handles poster automatically, but fallback color needs copying)
+    if (dvd.dataset.bgColor) {
+        newDvd.style.background = `linear-gradient(135deg, ${dvd.dataset.bgColor} 0%, ${adjustColor(dvd.dataset.bgColor, -30)} 100%)`;
+        newDvd.dataset.bgColor = dvd.dataset.bgColor;
+    }
     newDvd.classList.add('dvd-placed');
 
     slot.appendChild(newDvd);
@@ -463,8 +592,11 @@ function fallBackToFloor(dvd, slot) {
         } else {
             // DVD was from a shelf slot, create new one on floor
             const newDvd = createDVD(dvd.dataset.title);
-            newDvd.style.background = `linear-gradient(135deg, ${dvd.dataset.bgColor} 0%, ${adjustColor(dvd.dataset.bgColor, -30)} 100%)`;
-            newDvd.dataset.bgColor = dvd.dataset.bgColor;
+            // Preserve original styling (createDVD handles poster automatically, but fallback color needs copying)
+            if (dvd.dataset.bgColor) {
+                newDvd.style.background = `linear-gradient(135deg, ${dvd.dataset.bgColor} 0%, ${adjustColor(dvd.dataset.bgColor, -30)} 100%)`;
+                newDvd.dataset.bgColor = dvd.dataset.bgColor;
+            }
             floor.appendChild(newDvd);
             dvd.remove();
         }
