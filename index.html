@@ -11,27 +11,37 @@
         <h1>DVD Shelf Organizer</h1>
         <div class="start-instructions">
             <h3>How to Play</h3>
-            <p>Place DVDs on the shelf in <strong>alphabetical order</strong>.</p>
+            <p>Place DVDs on the shelf in <strong>alphabetical&nbsp;order</strong>.</p>
             <p>"The" at the start of titles is ignored.</p>
             <p>Leave gaps for future movies!</p>
             <p>Too many on the floor = game over!</p>
         </div>
-        <button class="start-btn" onclick="startGame()">Start Game</button>
+        <div class="difficulty-select">
+            <h3>Select Difficulty</h3>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn" onclick="startGame('easy')">Easy</button>
+                <button class="difficulty-btn" onclick="startGame('medium')">Medium</button>
+                <button class="difficulty-btn" onclick="startGame('hard')">Hard</button>
+                <button class="difficulty-btn" onclick="startGame('insane')">Insane</button>
+            </div>
+        </div>
     </div>
 
     <div class="game-over-overlay" id="gameOverOverlay">
         <div class="game-over-text">GAME OVER</div>
+        <div class="game-over-difficulty" id="gameOverDifficulty">Medium</div>
         <div class="final-score">Score: <span id="finalScore">0</span></div>
         <div id="gameOverReason"></div>
-        <button class="restart-btn" onclick="restartGame()">Play Again</button>
+        <button class="restart-btn" onclick="goToHome()">Play Again</button>
     </div>
 
     <div class="game-container">
         <header id="gameHeader">
             <h1>DVD Shelf</h1>
+            <button class="new-btn" onclick="goToHome()">New</button>
             <div class="stats">
                 <div class="stat">Points <span class="stat-value" id="score">0</span></div>
-                <div class="stat">Level <span class="stat-value" id="level">1</span></div>
+                <div class="stat difficulty-stat"><span class="stat-value" id="difficultyDisplay">Medium</span></div>
             </div>
         </header>
 

@@ -33,7 +33,7 @@ const MOVIE_TITLES = [
 ];
 
 let score = 0;
-let level = 1;
+let difficulty = 'medium';
 let shelvedCount = 0;
 let gameRunning = false;
 let spawnInterval = null;
@@ -47,6 +47,13 @@ const SHELVES_COUNT = 3;
 const SLOTS_PER_SHELF = 4;
 const MAX_FLOOR_DVDS = 5;
 const TOTAL_DVDS = SHELVES_COUNT * SLOTS_PER_SHELF;
+
+const DIFFICULTY_SETTINGS = {
+    easy: { interval: 5000, multiplier: 1, label: 'Easy', color: '#4ecca3' },
+    medium: { interval: 4000, multiplier: 2, label: 'Medium', color: '#ffc75f' },
+    hard: { interval: 2500, multiplier: 4, label: 'Hard', color: '#ff6b6b' },
+    insane: { interval: 1500, multiplier: 8, label: 'Insane', color: '#e94560' }
+};
 
 let dvdsSpawned = 0;
 
@@ -253,7 +260,7 @@ function placeDVDInSlot(dvd, slot) {
     }
 
     if (isFromFloor) {
-        score += 10 * level;
+        score += 10 * DIFFICULTY_SETTINGS[difficulty].multiplier;
         shelvedCount++;
         updateStats();
         updateFloorCapacity();
@@ -263,10 +270,6 @@ function placeDVDInSlot(dvd, slot) {
         if (dvdsSpawned >= TOTAL_DVDS && floor.children.length === 0) {
             gameWin();
             return true;
-        }
-
-        if (shelvedCount % 10 === 0) {
-            levelUp();
         }
     }
 
@@ -456,18 +459,11 @@ function fallBackToFloor(dvd, slot) {
     }, 600);
 }
 
-function levelUp() {
-    level++;
-    updateStats();
-
-    clearInterval(spawnInterval);
-    const newInterval = Math.max(1500, 4000 - (level * 300));
-    spawnInterval = setInterval(spawnDVD, newInterval);
-}
-
 function updateStats() {
     document.getElementById('score').textContent = score;
-    document.getElementById('level').textContent = level;
+    const diffDisplay = document.getElementById('difficultyDisplay');
+    diffDisplay.textContent = DIFFICULTY_SETTINGS[difficulty].label;
+    diffDisplay.style.background = DIFFICULTY_SETTINGS[difficulty].color;
 }
 
 function gameOver(reason) {
@@ -475,6 +471,9 @@ function gameOver(reason) {
     clearInterval(spawnInterval);
 
     document.getElementById('finalScore').textContent = score;
+    const gameOverDiff = document.getElementById('gameOverDifficulty');
+    gameOverDiff.textContent = DIFFICULTY_SETTINGS[difficulty].label;
+    gameOverDiff.style.color = DIFFICULTY_SETTINGS[difficulty].color;
     document.getElementById('gameOverReason').textContent = reason;
     document.getElementById('gameOverOverlay').classList.add('active');
 }
@@ -484,23 +483,36 @@ function gameWin() {
     clearInterval(spawnInterval);
 
     document.getElementById('finalScore').textContent = score;
+    const gameOverDiff = document.getElementById('gameOverDifficulty');
+    gameOverDiff.textContent = DIFFICULTY_SETTINGS[difficulty].label;
+    gameOverDiff.style.color = DIFFICULTY_SETTINGS[difficulty].color;
     document.getElementById('gameOverReason').textContent = 'You organized all the DVDs!';
     document.getElementById('gameOverOverlay').classList.add('active');
 }
 
-function startGame() {
+function goToHome() {
+    gameRunning = false;
+    clearInterval(spawnInterval);
+    document.getElementById('gameOverOverlay').classList.remove('active');
+    document.getElementById('gameHeader').classList.remove('game-active');
+    document.getElementById('startOverlay').classList.remove('hidden');
+    resetGame();
+}
+
+function startGame(selectedDifficulty) {
+    difficulty = selectedDifficulty || 'medium';
     document.getElementById('startOverlay').classList.add('hidden');
     document.getElementById('gameHeader').classList.add('game-active');
     resetGame();
     gameRunning = true;
 
+    const intervalMs = DIFFICULTY_SETTINGS[difficulty].interval;
     spawnDVD();
-    spawnInterval = setInterval(spawnDVD, 4000);
+    spawnInterval = setInterval(spawnDVD, intervalMs);
 }
 
 function resetGame() {
     score = 0;
-    level = 1;
     shelvedCount = 0;
     dvdsSpawned = 0;
     usedTitles.clear();
@@ -510,14 +522,6 @@ function resetGame() {
     document.getElementById('floorDvds').innerHTML = '';
     updateStats();
     updateFloorCapacity();
-}
-
-function restartGame() {
-    document.getElementById('gameOverOverlay').classList.remove('active');
-    resetGame();
-    gameRunning = true;
-    spawnDVD();
-    spawnInterval = setInterval(spawnDVD, 4000);
 }
 
 document.addEventListener('click', (e) => {

@@ -32,10 +32,10 @@ body {
 
 header {
     display: flex;
-    justify-content: flex-end;
     align-items: center;
     padding: 5px 0 10px;
     flex-shrink: 0;
+    gap: 10px;
 }
 
 header.game-active h1 {
@@ -65,6 +65,26 @@ h1 {
     padding: 2px 8px;
     border-radius: 4px;
     font-weight: bold;
+}
+
+.difficulty-stat {
+    text-transform: uppercase;
+    font-size: 0.85em;
+}
+
+.new-btn {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 6px 14px;
+    font-size: 0.85em;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: auto;
+}
+
+.new-btn:hover {
+    background: rgba(255,255,255,0.2);
 }
 
 .shelving-unit {
@@ -262,10 +282,19 @@ h1 {
     text-shadow: 0 0 20px #e94560;
 }
 
+.game-over-difficulty {
+    font-size: 1.1em;
+    color: #4ecca3;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
 .final-score {
     font-size: 1.5em;
     margin-bottom: 20px;
 }
+
 
 .restart-btn, .start-btn {
     background: #e94560;
@@ -298,6 +327,46 @@ h1 {
 
 .start-instructions p {
     margin-bottom: 10px;
+}
+
+.difficulty-select {
+    margin-bottom: 10px;
+    width: 90%;
+    max-width: 400px;
+}
+
+.difficulty-select h3 {
+    color: #e94560;
+    margin-bottom: 15px;
+}
+
+.difficulty-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.difficulty-btn {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.2);
+    padding: 14px 24px;
+    font-size: 1.1em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.difficulty-btn:hover {
+    background: #e94560;
+    border-color: #e94560;
+    transform: scale(1.05);
+}
+
+.difficulty-btn:active {
+    transform: scale(0.98);
 }
 
 #gameOverReason {
