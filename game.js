@@ -39,11 +39,13 @@ let gameRunning = false;
 let spawnInterval = null;
 let usedTitles = new Set();
 let selectedDVD = null;
+let draggedDVD = null;
+let touchDragClone = null;
+let touchStartPos = null;
 
 const SHELVES_COUNT = 3;
 const SLOTS_PER_SHELF = 4;
 const MAX_FLOOR_DVDS = 5;
-const TOLERANCE = 3;
 
 const DVD_COLORS = [
     '#e94560', '#0f3460', '#4ecca3', '#ff6b6b', '#845ec2',
@@ -72,6 +74,9 @@ function generateShelves() {
 
             slot.addEventListener('click', handleSlotClick);
             slot.addEventListener('touchend', handleSlotClick);
+            slot.addEventListener('dragover', handleDragOver);
+            slot.addEventListener('dragleave', handleDragLeave);
+            slot.addEventListener('drop', handleDrop);
 
             shelf.appendChild(slot);
         }
@@ -85,9 +90,11 @@ function createDVD(title) {
     dvd.className = 'dvd';
     dvd.dataset.title = title;
     dvd.dataset.sortKey = getSortKey(title);
+    dvd.draggable = true;
 
     const color = DVD_COLORS[Math.floor(Math.random() * DVD_COLORS.length)];
     dvd.style.background = `linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -30)} 100%)`;
+    dvd.dataset.bgColor = color;
 
     const spine = document.createElement('div');
     spine.className = 'dvd-spine';
@@ -96,7 +103,11 @@ function createDVD(title) {
     dvd.appendChild(spine);
 
     dvd.addEventListener('click', handleDVDClick);
-    dvd.addEventListener('touchend', handleDVDClick);
+    dvd.addEventListener('dragstart', handleDragStart);
+    dvd.addEventListener('dragend', handleDragEnd);
+    dvd.addEventListener('touchstart', handleTouchStart, { passive: false });
+    dvd.addEventListener('touchmove', handleTouchMove, { passive: false });
+    dvd.addEventListener('touchend', handleTouchEnd);
 
     return dvd;
 }
@@ -153,8 +164,6 @@ function handleDVDClick(e) {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!this.closest('.floor-dvds')) return;
-
     if (selectedDVD) {
         selectedDVD.classList.remove('selected');
     }
@@ -173,99 +182,266 @@ function handleSlotClick(e) {
 
     if (!selectedDVD || this.children.length > 0) return;
 
-    const shelfIndex = parseInt(this.dataset.shelfIndex);
-    const slotIndex = parseInt(this.dataset.slotIndex);
-    const dvdSortKey = selectedDVD.dataset.sortKey;
+    placeDVDInSlot(selectedDVD, this);
+}
 
-    const shelf = document.querySelectorAll(`.shelf[data-shelf-index="${shelfIndex}"] .shelf-slot`);
-    const dvdsOnShelf = [];
+function placeDVDInSlot(dvd, slot) {
+    const isFromFloor = dvd.closest('.floor-dvds') !== null;
+    const sourceSlot = dvd.closest('.shelf-slot');
 
-    shelf.forEach((slot, idx) => {
-        if (slot.children.length > 0 && slot.children[0].classList.contains('dvd')) {
-            dvdsOnShelf.push({
-                index: idx,
-                sortKey: slot.children[0].dataset.sortKey
-            });
-        }
-    });
+    const shelfIndex = parseInt(slot.dataset.shelfIndex);
+    const slotIndex = parseInt(slot.dataset.slotIndex);
+    const dvdSortKey = dvd.dataset.sortKey;
 
-    dvdsOnShelf.push({ index: slotIndex, sortKey: dvdSortKey });
-    dvdsOnShelf.sort((a, b) => a.index - b.index);
+    // Calculate global position (shelf 0 slots 0-3 = positions 0-3, shelf 1 slots 0-3 = positions 4-7, etc.)
+    const targetGlobalPos = shelfIndex * SLOTS_PER_SHELF + slotIndex;
 
+    // Gather ALL DVDs from ALL shelves
+    const allDvds = [];
+    for (let s = 0; s < SHELVES_COUNT; s++) {
+        const shelfSlots = document.querySelectorAll(`.shelf[data-shelf-index="${s}"] .shelf-slot`);
+        shelfSlots.forEach((slotEl, idx) => {
+            if (slotEl.children.length > 0 && slotEl.children[0].classList.contains('dvd')) {
+                if (slotEl !== sourceSlot) {
+                    allDvds.push({
+                        globalIndex: s * SLOTS_PER_SHELF + idx,
+                        sortKey: slotEl.children[0].dataset.sortKey
+                    });
+                }
+            }
+        });
+    }
+
+    // Add the DVD being placed
+    allDvds.push({ globalIndex: targetGlobalPos, sortKey: dvdSortKey });
+    allDvds.sort((a, b) => a.globalIndex - b.globalIndex);
+
+    // Check if global order is alphabetical
     let isValid = true;
-    let errorDistance = 0;
-
-    for (let i = 0; i < dvdsOnShelf.length - 1; i++) {
-        if (dvdsOnShelf[i].sortKey > dvdsOnShelf[i + 1].sortKey) {
+    for (let i = 0; i < allDvds.length - 1; i++) {
+        if (allDvds[i].sortKey > allDvds[i + 1].sortKey) {
             isValid = false;
-            const sorted = [...dvdsOnShelf].sort((a, b) => a.sortKey.localeCompare(b.sortKey));
-            const actualPos = dvdsOnShelf.findIndex(d => d.sortKey === dvdSortKey);
-            const correctPos = sorted.findIndex(d => d.sortKey === dvdSortKey);
-            errorDistance = Math.abs(actualPos - correctPos);
             break;
         }
     }
 
-    if (!isValid && errorDistance > TOLERANCE) {
-        collapseShelf(shelfIndex);
-        selectedDVD.classList.remove('selected');
+    if (!isValid) {
+        // DVD falls back to floor with animation
+        fallBackToFloor(dvd, slot);
+        if (selectedDVD) {
+            selectedDVD.classList.remove('selected');
+            selectedDVD = null;
+        }
+        return false;
+    }
+
+    const newDvd = createDVD(dvd.dataset.title);
+    newDvd.style.background = `linear-gradient(135deg, ${dvd.dataset.bgColor} 0%, ${adjustColor(dvd.dataset.bgColor, -30)} 100%)`;
+    newDvd.dataset.bgColor = dvd.dataset.bgColor;
+    newDvd.classList.add('dvd-placed');
+
+    slot.appendChild(newDvd);
+    dvd.remove();
+
+    if (selectedDVD === dvd) {
         selectedDVD = null;
-        return;
     }
 
-    const dvdClone = selectedDVD.cloneNode(true);
-    dvdClone.classList.remove('selected');
-    dvdClone.classList.add('dvd-placed');
-    dvdClone.style.cursor = 'default';
-
-    this.appendChild(dvdClone);
-    selectedDVD.remove();
-    selectedDVD = null;
-
-    if (isValid) {
+    if (isFromFloor) {
         score += 10 * level;
-    } else {
-        score += 5 * level;
+        shelvedCount++;
+        updateStats();
+        updateFloorCapacity();
+
+        if (shelvedCount % 10 === 0) {
+            levelUp();
+        }
     }
 
-    shelvedCount++;
-    updateStats();
-    updateFloorCapacity();
+    return true;
+}
 
-    if (shelvedCount % 10 === 0) {
-        levelUp();
+function handleDragStart(e) {
+    draggedDVD = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', this.dataset.title);
+
+    if (selectedDVD && selectedDVD !== this) {
+        selectedDVD.classList.remove('selected');
+    }
+    selectedDVD = null;
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    draggedDVD = null;
+    document.querySelectorAll('.shelf-slot.drag-over').forEach(slot => {
+        slot.classList.remove('drag-over');
+    });
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    if (!draggedDVD) return;
+    if (this.children.length > 0) return;
+
+    e.dataTransfer.dropEffect = 'move';
+    this.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    this.classList.remove('drag-over');
+
+    if (!draggedDVD || this.children.length > 0) return;
+
+    placeDVDInSlot(draggedDVD, this);
+    draggedDVD = null;
+}
+
+function handleTouchStart(e) {
+    if (e.touches.length !== 1) return;
+
+    const touch = e.touches[0];
+    touchStartPos = { x: touch.clientX, y: touch.clientY };
+}
+
+function handleTouchMove(e) {
+    if (!touchStartPos || e.touches.length !== 1) return;
+
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - touchStartPos.x);
+    const dy = Math.abs(touch.clientY - touchStartPos.y);
+
+    if (dx > 10 || dy > 10) {
+        e.preventDefault();
+
+        if (!touchDragClone) {
+            draggedDVD = this;
+            this.classList.add('dragging');
+
+            touchDragClone = this.cloneNode(true);
+            touchDragClone.classList.add('touch-drag-clone');
+            touchDragClone.style.position = 'fixed';
+            touchDragClone.style.pointerEvents = 'none';
+            touchDragClone.style.zIndex = '1000';
+            touchDragClone.style.width = this.offsetWidth + 'px';
+            touchDragClone.style.height = this.offsetHeight + 'px';
+            touchDragClone.style.opacity = '0.85';
+            document.body.appendChild(touchDragClone);
+
+            if (selectedDVD && selectedDVD !== this) {
+                selectedDVD.classList.remove('selected');
+            }
+            selectedDVD = null;
+        }
+
+        touchDragClone.style.left = (touch.clientX - touchDragClone.offsetWidth / 2) + 'px';
+        touchDragClone.style.top = (touch.clientY - touchDragClone.offsetHeight / 2) + 'px';
+
+        document.querySelectorAll('.shelf-slot.drag-over').forEach(slot => {
+            slot.classList.remove('drag-over');
+        });
+
+        const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+        const slotBelow = elementBelow?.closest('.shelf-slot');
+        if (slotBelow && slotBelow.children.length === 0) {
+            slotBelow.classList.add('drag-over');
+        }
     }
 }
 
-function collapseShelf(shelfIndex) {
-    const shelf = document.querySelector(`.shelf[data-shelf-index="${shelfIndex}"]`);
-    const slots = shelf.querySelectorAll('.shelf-slot');
-    const floor = document.getElementById('floorDvds');
+function handleTouchEnd(e) {
+    if (touchDragClone) {
+        const touch = e.changedTouches[0];
+        const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+        const slotBelow = elementBelow?.closest('.shelf-slot');
 
-    let dvdsCollapsed = 0;
-
-    slots.forEach(slot => {
-        if (slot.children.length > 0 && slot.children[0].classList.contains('dvd')) {
-            const dvd = slot.children[0];
-            dvd.classList.add('shelf-collapse');
-
-            setTimeout(() => {
-                const newDvd = createDVD(dvd.dataset.title);
-                floor.appendChild(newDvd);
-                dvd.remove();
-                updateFloorCapacity();
-
-                if (floor.children.length >= MAX_FLOOR_DVDS) {
-                    gameOver('Shelf collapsed - floor overflow!');
-                }
-            }, 500);
-
-            dvdsCollapsed++;
+        if (slotBelow && slotBelow.children.length === 0 && draggedDVD) {
+            placeDVDInSlot(draggedDVD, slotBelow);
         }
-    });
 
-    score = Math.max(0, score - 50 * dvdsCollapsed);
-    updateStats();
+        document.querySelectorAll('.shelf-slot.drag-over').forEach(slot => {
+            slot.classList.remove('drag-over');
+        });
+
+        touchDragClone.remove();
+        touchDragClone = null;
+
+        if (draggedDVD) {
+            draggedDVD.classList.remove('dragging');
+            draggedDVD = null;
+        }
+
+        touchStartPos = null;
+        e.preventDefault();
+        return;
+    }
+
+    touchStartPos = null;
+
+    if (!draggedDVD) {
+        handleDVDClick.call(this, e);
+    }
+}
+
+function fallBackToFloor(dvd, slot) {
+    const floor = document.getElementById('floorDvds');
+    const isFromFloor = dvd.closest('.floor-dvds') !== null;
+
+    // Get positions for animation
+    const slotRect = slot.getBoundingClientRect();
+    const floorRect = floor.getBoundingClientRect();
+
+    // Create a falling clone for the animation
+    const fallingDvd = dvd.cloneNode(true);
+    fallingDvd.classList.add('dvd-falling');
+    fallingDvd.style.position = 'fixed';
+    fallingDvd.style.left = slotRect.left + (slotRect.width / 2) - 35 + 'px';
+    fallingDvd.style.top = slotRect.top + 'px';
+    fallingDvd.style.width = '70px';
+    fallingDvd.style.height = slotRect.height * 0.85 + 'px';
+    fallingDvd.style.zIndex = '500';
+    fallingDvd.style.pointerEvents = 'none';
+
+    // Set the fall distance as CSS variable
+    const fallDistance = floorRect.top - slotRect.top;
+    fallingDvd.style.setProperty('--fall-distance', fallDistance + 'px');
+
+    document.body.appendChild(fallingDvd);
+
+    // Hide original if from floor during animation
+    if (isFromFloor) {
+        dvd.style.visibility = 'hidden';
+    }
+
+    // After animation, add DVD back to floor
+    setTimeout(() => {
+        fallingDvd.remove();
+
+        if (isFromFloor) {
+            dvd.style.visibility = 'visible';
+            dvd.classList.remove('selected');
+        } else {
+            // DVD was from a shelf slot, create new one on floor
+            const newDvd = createDVD(dvd.dataset.title);
+            newDvd.style.background = `linear-gradient(135deg, ${dvd.dataset.bgColor} 0%, ${adjustColor(dvd.dataset.bgColor, -30)} 100%)`;
+            newDvd.dataset.bgColor = dvd.dataset.bgColor;
+            floor.appendChild(newDvd);
+            dvd.remove();
+        }
+
+        updateFloorCapacity();
+
+        if (floor.children.length >= MAX_FLOOR_DVDS) {
+            gameOver('Too many DVDs on the floor!');
+        }
+    }, 600);
 }
 
 function levelUp() {
