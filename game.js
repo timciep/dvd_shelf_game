@@ -27,9 +27,9 @@ const MOVIE_TITLES = [
     "Zootopia", "Big Hero 6", "Tangled", "Brave", "Cars", "A Bug's Life",
     "The Lion King", "Aladdin", "Beauty and the Beast", "The Little Mermaid",
     "Mulan", "Pocahontas", "Hercules", "Tarzan", "Lilo and Stitch",
-    "The Nightmare Before Christmas", "Coraline", "ParaNorman", "Kubo",
+    "The Nightmare Before Christmas", "Coraline", "ParaNorman",
     "Spirited Away", "My Neighbor Totoro", "Princess Mononoke", "Howl's Moving Castle",
-    "Akira", "Ghost in the Shell", "Your Name", "Weathering with You"
+    "Akira", "Ghost in the Shell", "Your Name", "Wuthering Heights"
 ];
 
 let score = 0;
