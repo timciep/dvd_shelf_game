@@ -271,6 +271,48 @@ h1 {
     display: flex;
 }
 
+.game-over-overlay.win .game-over-text {
+    color: #4ecca3;
+    text-shadow: 0 0 20px #4ecca3, 0 0 40px #4ecca3, 0 0 60px #4ecca3;
+    animation: winPulse 1s ease-in-out infinite;
+}
+
+@keyframes winPulse {
+    0%, 100% {
+        transform: scale(1);
+        text-shadow: 0 0 20px #4ecca3, 0 0 40px #4ecca3, 0 0 60px #4ecca3;
+    }
+    50% {
+        transform: scale(1.1);
+        text-shadow: 0 0 30px #4ecca3, 0 0 60px #4ecca3, 0 0 90px #4ecca3;
+    }
+}
+
+.falling-emoji {
+    position: absolute;
+    font-size: 24px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.game-over-overlay.win .falling-emoji {
+    animation: emojiFall 4s ease-out forwards;
+}
+
+@keyframes emojiFall {
+    0% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg) scale(0.5);
+    }
+    10% {
+        transform: translateY(10vh) rotate(45deg) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(100vh) rotate(360deg) scale(0.8);
+    }
+}
+
 .start-overlay.hidden {
     display: none;
 }

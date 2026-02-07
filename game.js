@@ -489,13 +489,36 @@ function gameWin() {
     gameOverDiff.textContent = DIFFICULTY_SETTINGS[difficulty].label;
     gameOverDiff.style.color = DIFFICULTY_SETTINGS[difficulty].color;
     document.getElementById('gameOverReason').textContent = 'You organized all the DVDs!';
-    document.getElementById('gameOverOverlay').classList.add('active');
+
+    const overlay = document.getElementById('gameOverOverlay');
+    overlay.classList.add('active', 'win');
+    spawnConfetti(overlay);
+}
+
+function spawnConfetti(container) {
+    const emojis = ['🎬', '🎥', '🎞️', '🍿', '📀', '⭐', '🏆', '🎭', '📽️', '🎦'];
+    const emojiCount = 30;
+
+    for (let i = 0; i < emojiCount; i++) {
+        const emoji = document.createElement('div');
+        emoji.className = 'falling-emoji';
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        emoji.style.left = Math.random() * 100 + '%';
+        emoji.style.top = -30 + 'px';
+        emoji.style.animationDelay = Math.random() * 2.5 + 's';
+        emoji.style.animationDuration = (3 + Math.random() * 2) + 's';
+        emoji.style.fontSize = (20 + Math.random() * 16) + 'px';
+
+        container.appendChild(emoji);
+    }
 }
 
 function goToHome() {
     gameRunning = false;
     clearInterval(spawnInterval);
-    document.getElementById('gameOverOverlay').classList.remove('active');
+    const overlay = document.getElementById('gameOverOverlay');
+    overlay.classList.remove('active', 'win');
+    overlay.querySelectorAll('.falling-emoji').forEach(c => c.remove());
     document.getElementById('gameHeader').classList.remove('game-active');
     document.getElementById('startOverlay').classList.remove('hidden');
     resetGame();
