@@ -495,6 +495,35 @@ function gameWin() {
     spawnConfetti(overlay);
 }
 
+function shareScore() {
+    const isWin = document.getElementById('gameOverTitle').textContent === 'WIN!';
+    const diffLabel = DIFFICULTY_SETTINGS[difficulty].label;
+
+    // Build shelf visualization
+    let shelfEmojis = '';
+    for (let s = 0; s < SHELVES_COUNT; s++) {
+        const slots = document.querySelectorAll(`.shelf[data-shelf-index="${s}"] .shelf-slot`);
+        slots.forEach(slot => {
+            shelfEmojis += slot.children.length > 0 ? '🟩' : '🟥';
+        });
+        if (s < SHELVES_COUNT - 1) shelfEmojis += '\n';
+    }
+
+    const text = isWin
+        ? `💿 DVD Shelf Organizer 💿\n\n${shelfEmojis}\nLevel: ${diffLabel} | Score: ${score} 🏆\n\nhttps://DVD-Shelf-Game.timcieplowski.com`
+        : `💿 DVD Shelf Organizer 💿\n\n${shelfEmojis}\nLevel: ${diffLabel} | Score: ${score}\n\nhttps://DVD-Shelf-Game.timcieplowski.com`;
+
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.share-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+            btn.textContent = 'Share';
+            btn.classList.remove('copied');
+        }, 2000);
+    });
+}
+
 function spawnConfetti(container) {
     const emojis = ['🎬', '🎥', '🎞️', '🍿', '📀', '⭐', '🏆', '🎭', '📽️', '🎦'];
     const emojiCount = 30;

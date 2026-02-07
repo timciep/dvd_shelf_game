@@ -339,8 +339,13 @@ h1 {
 }
 
 
-.restart-btn, .start-btn {
+.game-over-buttons {
+    display: flex;
+    gap: 12px;
     margin-top: 10px;
+}
+
+.restart-btn, .start-btn {
     background: #e94560;
     color: #fff;
     border: none;
@@ -348,6 +353,26 @@ h1 {
     font-size: 1.2em;
     border-radius: 10px;
     cursor: pointer;
+}
+
+.share-btn {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.3);
+    padding: 14px 35px;
+    font-size: 1.2em;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.share-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.share-btn.copied {
+    background: #4ecca3;
+    border-color: #4ecca3;
 }
 
 .start-overlay h1 {
