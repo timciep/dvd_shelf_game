@@ -13,7 +13,6 @@ A web-based puzzle game where you organize DVDs on shelves in alphabetical order
 ## Lose Conditions
 
 - **Floor overflow**: If too many DVDs pile up on the floor (max 5), game over
-- **Shelf collapse**: Place a DVD too far from its correct alphabetical position and the entire shelf collapses, dumping all its DVDs back to the floor
 
 ## Scoring
 

@@ -46,6 +46,9 @@ let touchStartPos = null;
 const SHELVES_COUNT = 3;
 const SLOTS_PER_SHELF = 4;
 const MAX_FLOOR_DVDS = 5;
+const TOTAL_DVDS = SHELVES_COUNT * SLOTS_PER_SHELF;
+
+let dvdsSpawned = 0;
 
 const DVD_COLORS = [
     '#e94560', '#0f3460', '#4ecca3', '#ff6b6b', '#845ec2',
@@ -123,6 +126,12 @@ function adjustColor(color, amount) {
 function spawnDVD() {
     if (!gameRunning) return;
 
+    // Don't spawn more DVDs than shelf slots
+    if (dvdsSpawned >= TOTAL_DVDS) {
+        clearInterval(spawnInterval);
+        return;
+    }
+
     const floor = document.getElementById('floorDvds');
     const currentCount = floor.children.length;
 
@@ -131,17 +140,13 @@ function spawnDVD() {
         return;
     }
 
-    let availableTitles = MOVIE_TITLES.filter(t => !usedTitles.has(t));
-    if (availableTitles.length === 0) {
-        usedTitles.clear();
-        availableTitles = MOVIE_TITLES;
-    }
-
+    const availableTitles = MOVIE_TITLES.filter(t => !usedTitles.has(t));
     const title = availableTitles[Math.floor(Math.random() * availableTitles.length)];
     usedTitles.add(title);
 
     const dvd = createDVD(title);
     floor.appendChild(dvd);
+    dvdsSpawned++;
 
     updateFloorCapacity();
 }
@@ -252,6 +257,13 @@ function placeDVDInSlot(dvd, slot) {
         shelvedCount++;
         updateStats();
         updateFloorCapacity();
+
+        // Check for win - all DVDs spawned and floor is empty
+        const floor = document.getElementById('floorDvds');
+        if (dvdsSpawned >= TOTAL_DVDS && floor.children.length === 0) {
+            gameWin();
+            return true;
+        }
 
         if (shelvedCount % 10 === 0) {
             levelUp();
@@ -467,6 +479,15 @@ function gameOver(reason) {
     document.getElementById('gameOverOverlay').classList.add('active');
 }
 
+function gameWin() {
+    gameRunning = false;
+    clearInterval(spawnInterval);
+
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('gameOverReason').textContent = 'You organized all the DVDs!';
+    document.getElementById('gameOverOverlay').classList.add('active');
+}
+
 function startGame() {
     document.getElementById('startOverlay').classList.add('hidden');
     document.getElementById('gameHeader').classList.add('game-active');
@@ -481,6 +502,7 @@ function resetGame() {
     score = 0;
     level = 1;
     shelvedCount = 0;
+    dvdsSpawned = 0;
     usedTitles.clear();
     selectedDVD = null;
 
