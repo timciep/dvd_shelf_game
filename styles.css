@@ -278,6 +278,7 @@ h1 {
 
 .game-over-overlay {
     display: none;
+    overflow: hidden;
 }
 
 .game-over-overlay.active {
