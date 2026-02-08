@@ -1,6 +1,6 @@
 # DVD Organization Simulator
 
-A web-based puzzle game where you organize DVDs on shelves in alphabetical order. Think Tetris meets library organization.
+A web-based game where you organize DVDs on shelves in alphabetical order.
 
 ![DVD Organization Simulator screenshot](images/m/screenshot.png)
 
