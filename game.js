@@ -660,8 +660,8 @@ function shareScore() {
     }
 
     const text = isWin
-        ? `💿 DVD Shelf Organizer 💿\n\n${shelfEmojis}\nLevel: ${diffLabel} | Score: ${score} 🏆\n\nhttps://DVD-Shelf-Game.timcieplowski.com`
-        : `💿 DVD Shelf Organizer 💿\n\n${shelfEmojis}\nLevel: ${diffLabel} | Score: ${score}\n\nhttps://DVD-Shelf-Game.timcieplowski.com`;
+        ? `💿 DVD Organization Simulator 💿\n\n${shelfEmojis}\nLevel: ${diffLabel} | Score: ${score} 🏆\n\nhttps://DVD-Shelf-Game.timcieplowski.com`
+        : `💿 DVD Organization Simulator 💿\n\n${shelfEmojis}\nLevel: ${diffLabel} | Score: ${score}\n\nhttps://DVD-Shelf-Game.timcieplowski.com`;
 
     navigator.clipboard.writeText(text).then(() => {
         const btn = document.querySelector('.share-btn');
