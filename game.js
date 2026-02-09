@@ -627,6 +627,8 @@ function gameOver(reason) {
     gameOverDiff.style.color = DIFFICULTY_SETTINGS[difficulty].color;
     document.getElementById('gameOverReason').textContent = reason;
     document.getElementById('gameOverOverlay').classList.add('active');
+
+    posthog.capture('dvd_game_lost', { difficulty, score, reason, dvds_shelved: shelvedCount });
 }
 
 function gameWin() {
@@ -639,6 +641,8 @@ function gameWin() {
     gameOverDiff.textContent = DIFFICULTY_SETTINGS[difficulty].label;
     gameOverDiff.style.color = DIFFICULTY_SETTINGS[difficulty].color;
     document.getElementById('gameOverReason').textContent = 'You organized all the DVDs!';
+
+    posthog.capture('dvd_game_won', { difficulty, score });
 
     const overlay = document.getElementById('gameOverOverlay');
     overlay.classList.add('active', 'win');
@@ -662,6 +666,8 @@ function shareScore() {
     const text = isWin
         ? `💿 DVD Organization Simulator 💿\n\n${shelfEmojis}\nLevel: ${diffLabel} | Score: ${score} 🏆\n\nhttps://DVD-Shelf-Game.timcieplowski.com`
         : `💿 DVD Organization Simulator 💿\n\n${shelfEmojis}\nLevel: ${diffLabel} | Score: ${score}\n\nhttps://DVD-Shelf-Game.timcieplowski.com`;
+
+    posthog.capture('dvd_share_score_copied', { difficulty, score, result: isWin ? 'win' : 'loss' });
 
     navigator.clipboard.writeText(text).then(() => {
         const btn = document.querySelector('.share-btn');
@@ -709,6 +715,8 @@ function startGame(selectedDifficulty) {
     document.getElementById('gameHeader').classList.add('game-active');
     resetGame();
     gameRunning = true;
+
+    posthog.capture('dvd_game_started', { difficulty });
 
     const intervalMs = DIFFICULTY_SETTINGS[difficulty].interval;
     spawnDVD();
