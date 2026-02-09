@@ -182,7 +182,7 @@ const DVD_COLORS = [
 ];
 
 function getSortKey(title) {
-    return title.replace(/^The\s+/i, '').toLowerCase();
+    return title.replace(/^(The|A|An)\s+/i, '').toLowerCase();
 }
 
 function generateShelves() {
