@@ -231,17 +231,16 @@ h1 {
     flex: 1;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: start;
     gap: 6px;
     padding-top: 5px;
     overflow: hidden;
 }
 
 .floor-dvds .dvd {
-    width: 60px;
-    min-width: 45px;
+    flex: 0 0 calc((100% - 24px) / 5);
     height: 100%;
-    flex-shrink: 1;
+    max-width: initial;
 }
 
 .floor-dvds .dvd .dvd-spine {
