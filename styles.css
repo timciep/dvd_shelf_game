@@ -129,6 +129,7 @@ h1 {
 }
 
 .dvd {
+    position: relative;
     width: 85%;
     height: 92%;
     max-width: 70px;
