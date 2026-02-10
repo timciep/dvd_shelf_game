@@ -160,6 +160,10 @@ let selectedDVD = null;
 let draggedDVD = null;
 let touchDragClone = null;
 let touchStartPos = null;
+let pendingDropDVD = null;
+let dropCountdownInterval = null;
+let dvdDropInProgress = false;
+let dropPhaseResting = true;
 
 const SHELVES_COUNT = 3;
 const SLOTS_PER_SHELF = 4;
@@ -259,16 +263,16 @@ function adjustColor(color, amount) {
 function spawnDVD() {
     if (!gameRunning) return;
 
-    // Don't spawn more DVDs than shelf slots
+    // Once all DVDs are spawned, drop a random one from the shelves instead
     if (dvdsSpawned >= TOTAL_DVDS) {
-        clearInterval(spawnInterval);
+        dropRandomShelfDVD();
         return;
     }
 
     const floor = document.getElementById('floorDvds');
     const currentCount = floor.children.length;
 
-    if (currentCount >= MAX_FLOOR_DVDS) {
+    if (currentCount > MAX_FLOOR_DVDS) {
         gameOver('Too many DVDs on the floor!');
         return;
     }
@@ -291,6 +295,155 @@ function spawnDVD() {
     flash.addEventListener('animationend', () => flash.remove(), { once: true });
 
     updateFloorCapacity();
+
+    if (floor.children.length > MAX_FLOOR_DVDS) {
+        gameOver('Too many DVDs on the floor!');
+    }
+}
+
+function dropRandomShelfDVD() {
+    if (!gameRunning) return;
+
+    // Drop the previously warned DVD, then rest
+    if (pendingDropDVD) {
+        const dvd = pendingDropDVD;
+        const slot = dvd.closest('.shelf-slot');
+        clearDropWarning();
+
+        if (slot) {
+            dvdDropInProgress = true;
+            executeDrop(dvd, slot);
+        }
+
+        dropPhaseResting = true;
+        return;
+    }
+
+    // Rest phase: skip one interval before warning
+    if (dropPhaseResting) {
+        dropPhaseResting = false;
+        return;
+    }
+
+    // Warn phase: pick and warn the next DVD
+    warnNextDrop();
+}
+
+function warnNextDrop() {
+    const shelfDvds = [];
+    for (let s = 0; s < SHELVES_COUNT; s++) {
+        const slots = document.querySelectorAll(`.shelf[data-shelf-index="${s}"] .shelf-slot`);
+        slots.forEach(slot => {
+            if (slot.children.length > 0 && slot.children[0].classList.contains('dvd')) {
+                shelfDvds.push(slot.children[0]);
+            }
+        });
+    }
+
+    if (shelfDvds.length === 0) return;
+
+    const dvd = shelfDvds[Math.floor(Math.random() * shelfDvds.length)];
+    pendingDropDVD = dvd;
+
+    dvd.classList.add('dvd-warning');
+
+    const intervalMs = DIFFICULTY_SETTINGS[difficulty].interval;
+    let secondsLeft = Math.ceil(intervalMs / 1000);
+
+    const countdown = document.createElement('div');
+    countdown.className = 'drop-countdown';
+    countdown.textContent = secondsLeft;
+    countdown.style.setProperty('--countdown-duration', (intervalMs / 1000) + 's');
+    dvd.appendChild(countdown);
+
+    dropCountdownInterval = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft > 0) {
+            countdown.textContent = secondsLeft;
+        }
+    }, 1000);
+}
+
+function clearDropWarning() {
+    if (dropCountdownInterval) {
+        clearInterval(dropCountdownInterval);
+        dropCountdownInterval = null;
+    }
+    if (pendingDropDVD) {
+        pendingDropDVD.classList.remove('dvd-warning');
+        const countdown = pendingDropDVD.querySelector('.drop-countdown');
+        if (countdown) countdown.remove();
+        pendingDropDVD = null;
+    }
+}
+
+function executeDrop(dvd, slot) {
+    const floor = document.getElementById('floorDvds');
+    const slotRect = slot.getBoundingClientRect();
+    const floorRect = floor.getBoundingClientRect();
+    const title = dvd.dataset.title;
+    const bgColor = dvd.dataset.bgColor;
+    const posterPath = dvd.dataset.posterPath;
+
+    // Hide original immediately
+    dvd.style.visibility = 'hidden';
+
+    // Build a fresh element for the animation (avoid cloneNode issues)
+    const fallingDvd = document.createElement('div');
+    fallingDvd.style.position = 'fixed';
+    fallingDvd.style.left = slotRect.left + (slotRect.width / 2) - 35 + 'px';
+    fallingDvd.style.top = slotRect.top + 'px';
+    fallingDvd.style.width = '70px';
+    fallingDvd.style.height = slotRect.height * 0.85 + 'px';
+    fallingDvd.style.zIndex = '500';
+    fallingDvd.style.pointerEvents = 'none';
+    fallingDvd.style.borderRadius = '4px';
+    fallingDvd.style.boxShadow = '2px 2px 6px rgba(0,0,0,0.4)';
+    fallingDvd.style.overflow = 'hidden';
+    fallingDvd.style.display = 'flex';
+    fallingDvd.style.alignItems = 'center';
+    fallingDvd.style.justifyContent = 'center';
+
+    if (posterPath) {
+        fallingDvd.style.backgroundImage = `url(${posterPath})`;
+        fallingDvd.style.backgroundSize = 'cover';
+        fallingDvd.style.backgroundPosition = 'center';
+    } else if (bgColor) {
+        fallingDvd.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${adjustColor(bgColor, -30)} 100%)`;
+    }
+
+    const spine = document.createElement('div');
+    spine.className = 'dvd-spine';
+    spine.textContent = title;
+    fallingDvd.appendChild(spine);
+
+    const fallDistance = floorRect.top - slotRect.top;
+    fallingDvd.style.setProperty('--fall-distance', fallDistance + 'px');
+
+    document.body.appendChild(fallingDvd);
+    // Force reflow before adding animation class
+    fallingDvd.offsetHeight;
+    fallingDvd.classList.add('dvd-falling');
+
+    setTimeout(() => {
+        fallingDvd.remove();
+        dvdDropInProgress = false;
+
+        if (!gameRunning) return;
+
+        const newDvd = createDVD(title);
+        if (bgColor) {
+            newDvd.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${adjustColor(bgColor, -30)} 100%)`;
+            newDvd.dataset.bgColor = bgColor;
+        }
+        floor.appendChild(newDvd);
+        dvd.remove();
+        updateFloorCapacity();
+
+        if (floor.children.length > MAX_FLOOR_DVDS) {
+            gameOver('Too many DVDs on the floor!');
+        }
+    }, 600);
 }
 
 function updateFloorCapacity() {
@@ -405,8 +558,8 @@ function placeDVDInSlot(dvd, slot) {
 
         const floor = document.getElementById('floorDvds');
 
-        // Check for win - all DVDs spawned and floor is empty
-        if (dvdsSpawned >= TOTAL_DVDS && floor.children.length === 0) {
+        // Check for win - all DVDs spawned, floor is empty, and no drop in progress
+        if (dvdsSpawned >= TOTAL_DVDS && floor.children.length === 0 && !dvdDropInProgress) {
             gameWin();
             return true;
         }
@@ -418,6 +571,7 @@ function placeDVDInSlot(dvd, slot) {
             const intervalMs = DIFFICULTY_SETTINGS[difficulty].interval;
             spawnInterval = setInterval(spawnDVD, intervalMs);
         }
+
     }
 
     return true;
@@ -577,10 +731,8 @@ function fallBackToFloor(dvd, slot) {
 
     document.body.appendChild(fallingDvd);
 
-    // Hide original if from floor during animation
-    if (isFromFloor) {
-        dvd.style.visibility = 'hidden';
-    }
+    // Hide original during animation
+    dvd.style.visibility = 'hidden';
 
     // After animation, add DVD back to floor
     setTimeout(() => {
@@ -603,7 +755,7 @@ function fallBackToFloor(dvd, slot) {
 
         updateFloorCapacity();
 
-        if (floor.children.length >= MAX_FLOOR_DVDS) {
+        if (floor.children.length > MAX_FLOOR_DVDS) {
             gameOver('Too many DVDs on the floor!');
         }
     }, 600);
@@ -619,6 +771,7 @@ function updateStats() {
 function gameOver(reason) {
     gameRunning = false;
     clearInterval(spawnInterval);
+    clearDropWarning();
 
     document.getElementById('gameOverTitle').textContent = 'GAME OVER';
     document.getElementById('finalScore').textContent = score;
@@ -634,6 +787,7 @@ function gameOver(reason) {
 function gameWin() {
     gameRunning = false;
     clearInterval(spawnInterval);
+    clearDropWarning();
 
     document.getElementById('gameOverTitle').textContent = 'WIN!';
     document.getElementById('finalScore').textContent = score;
@@ -729,6 +883,9 @@ function resetGame() {
     dvdsSpawned = 0;
     usedTitles.clear();
     selectedDVD = null;
+    clearDropWarning();
+    dvdDropInProgress = false;
+    dropPhaseResting = true;
 
     generateShelves();
     document.getElementById('floorDvds').innerHTML = '';
@@ -742,5 +899,39 @@ document.addEventListener('click', (e) => {
         selectedDVD = null;
     }
 });
+
+// Debug: fast-forward to end-game state (11 shelved, 1 on floor)
+// Usage: run fastForward() in browser console during a game
+function fastForward() {
+    const titles = [...MOVIE_TITLES].sort(() => Math.random() - 0.5).slice(0, TOTAL_DVDS);
+    const floorTitle = titles.pop();
+    titles.sort((a, b) => getSortKey(a).localeCompare(getSortKey(b)));
+
+    document.getElementById('floorDvds').innerHTML = '';
+    generateShelves();
+    usedTitles.clear();
+    titles.concat(floorTitle).forEach(t => usedTitles.add(t));
+    dvdsSpawned = TOTAL_DVDS;
+    clearInterval(spawnInterval);
+    clearDropWarning();
+    dropPhaseResting = true;
+
+    const slots = document.querySelectorAll('.shelf-slot');
+    titles.forEach((title, i) => {
+        const dvd = createDVD(title);
+        slots[i].appendChild(dvd);
+    });
+
+    const floorDvd = createDVD(floorTitle);
+    document.getElementById('floorDvds').appendChild(floorDvd);
+
+    shelvedCount = 11;
+    score = 11 * 10 * DIFFICULTY_SETTINGS[difficulty].multiplier;
+    updateStats();
+    updateFloorCapacity();
+
+    const intervalMs = DIFFICULTY_SETTINGS[difficulty].interval;
+    spawnInterval = setInterval(spawnDVD, intervalMs);
+}
 
 generateShelves();

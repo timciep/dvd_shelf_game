@@ -64,6 +64,10 @@ Poster images are stored locally in `images/posters/` (146 movies, ~2.2MB total)
 - `createDVD()` uses poster if available, falls back to random color gradient
 - `.dvd-spine` CSS has semi-transparent background for text readability
 
+## Debug Helpers
+
+- `fastForward()` — Run in browser console during a game to skip to end-game state (11 DVDs sorted on shelves, 1 on floor). Useful for testing the drop phase and win condition.
+
 ## When Making Changes
 
 - Test on both mobile and desktop viewport sizes
