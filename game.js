@@ -165,6 +165,12 @@ let dropCountdownInterval = null;
 let dvdDropInProgress = false;
 let dropPhaseResting = true;
 
+function unshelve() {
+    score = Math.max(0, score - 10 * DIFFICULTY_SETTINGS[difficulty].multiplier);
+    shelvedCount--;
+    updateStats();
+}
+
 const SHELVES_COUNT = 3;
 const SLOTS_PER_SHELF = 4;
 const MAX_FLOOR_DVDS = 5;
@@ -424,6 +430,8 @@ function executeDrop(dvd, slot) {
     // Force reflow before adding animation class
     fallingDvd.offsetHeight;
     fallingDvd.classList.add('dvd-falling');
+
+    unshelve();
 
     setTimeout(() => {
         fallingDvd.remove();
@@ -709,9 +717,11 @@ function handleTouchEnd(e) {
 function fallBackToFloor(dvd, slot) {
     const floor = document.getElementById('floorDvds');
     const isFromFloor = dvd.closest('.floor-dvds') !== null;
+    const sourceSlot = dvd.closest('.shelf-slot');
 
-    // Get positions for animation
-    const slotRect = slot.getBoundingClientRect();
+    // Animate from the DVD's current position, not the target slot
+    const animateFrom = (!isFromFloor && sourceSlot) ? sourceSlot : slot;
+    const slotRect = animateFrom.getBoundingClientRect();
     const floorRect = floor.getBoundingClientRect();
 
     // Create a falling clone for the animation
@@ -733,6 +743,10 @@ function fallBackToFloor(dvd, slot) {
 
     // Hide original during animation
     dvd.style.visibility = 'hidden';
+
+    if (!isFromFloor) {
+        unshelve();
+    }
 
     // After animation, add DVD back to floor
     setTimeout(() => {
@@ -788,6 +802,8 @@ function gameWin() {
     gameRunning = false;
     clearInterval(spawnInterval);
     clearDropWarning();
+
+    if (difficulty === 'insane') score = 1000;
 
     document.getElementById('gameOverTitle').textContent = 'WIN!';
     document.getElementById('finalScore').textContent = score;
